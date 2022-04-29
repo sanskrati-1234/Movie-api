@@ -13,6 +13,7 @@ app.get("/movies", (req, res) => {
 
 app.post("/movies", async (req, res) => {
   console.log("lin12", req.body);
+  console.log(Movie);
   const data = new Movie(req.body);
   await data.save();
   res.sendStatus(200);
