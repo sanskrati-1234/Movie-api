@@ -9,30 +9,45 @@ app.use(express.urlencoded());
 connectDB();
 app.get("/movies", async (req, res) => {
   try {
-    const search = req.search;
-    console.log(
-      Movie.find({
-        $or: [
-          { title: new RegExp(search, "i") },
-          { year: new RegExp(search, "i") },
-          { rating: new RegExp(search, "i") },
-          { thumbnail: new RegExp(search, "i") },
-          { category: new RegExp(search, "i") },
-        ],
-      })
-    );
-
+    const { search } = req.query;
+    console.log("LIN13", search);
+    const searchQ = {
+      $or: [
+        { title: new RegExp(search, "i") },
+        { year: new RegExp(search, "i") },
+        { rating: new RegExp(search, "i") },
+        { thumbnail: new RegExp(search, "i") },
+        { category: new RegExp(search, "i") },
+      ],
+    };
     res.send({
       data: {
-        totalRecords: await Movie.find().count(),
-        results: [await Movie.find()],
+        totalRecords: await Movie.find(searchQ).count(),
+        results: await Movie.find(searchQ, {
+          _id: 0,
+          title: 1,
+          year: 1,
+          rating: 1,
+          thumbnail: 1,
+        }).limit(2),
       },
       meta: {
-        message: "SUCCESS",
+        message: "Movie details",
         code: 200,
       },
     });
-  } catch (e) {}
+  } catch (e) {
+    res.send({
+      data: {
+        totalRecords: await Movie.find(searchQ).count(),
+        results: [],
+      },
+      meta: {
+        message: e.message,
+        code: 200,
+      },
+    });
+  }
 });
 
 app.post("/movies", async (req, res) => {
